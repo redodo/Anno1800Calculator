@@ -6,6 +6,7 @@ assetsMap = new Map();
 view = {
     regions: [],
     populationLevels: [],
+    sortedPopulationLevels: [],
     factories: [],
     categories: [],
     workforce: [],
@@ -95,7 +96,7 @@ class Factory extends NamedElement {
 
             let amount = parseFloat(this.amount());
             if (val < -Math.ceil(amount * 100) / 100)
-                this.extraAmount(- Math.ceil(amount * 100)/100);
+                this.extraAmount(- Math.ceil(amount * 100) / 100);
             else
                 this.extraDemand.updateAmount(Math.max(val, -amount));
         });
@@ -125,8 +126,8 @@ class Factory extends NamedElement {
         var sum = 0;
         this.demands.forEach(d => {
             var a = d.amount();
-//            if (a <= -EPSILON || a > 0)
-                sum += a;
+            //            if (a <= -EPSILON || a > 0)
+            sum += a;
         });
 
         if (sum < -EPSILON) {
@@ -237,11 +238,25 @@ class Demand extends NamedElement {
 
 
             this.amount.subscribe(val => {
+                // :MARK: HIER WORDT HET AANTAL VERDER GEDUWD
+                console.log(' -->', this.product.name(), 'updated to', val);
+                this.self_busy = true;
                 this.factory().updateAmount();
+                this.self_busy = false;
             });
 
             this.buildings = ko.computed(() => parseFloat(this.amount()) / this.factory().tpmin / this.factory().boost());
         }
+
+        this.self_busy = false;
+        this.busy = ko.computed(() => {
+            if (this.self_busy) return this;
+            for (let d of this.demands) {
+                let busy = d.busy();
+                if (busy) return busy;
+            }
+            return false;
+        });
     }
 
     updateFixedProductFactory(f) {
@@ -287,13 +302,25 @@ class DemandSwitch {
         this.amount = 0;
 
         this.items.forEach(item => item.checked.subscribe(() => this.updateAmount(this.amount)));
+
+        this.self_busy = false;
+        this.busy = ko.computed(() => {
+            if (this.self_busy) return this;
+            for (let d of this.demands) {
+                let busy = d.busy();
+                if (busy) return busy;
+            }
+            return false;
+        });
     }
 
     updateAmount(amount) {
         this.amount = amount;
         this.demands.forEach((d, idx) => {
             let checked = this.items.map(item => item.checked()).reduce((a, b) => a || b);
-            d.updateAmount(checked == idx ? amount : 0)
+            this.self_busy = true;
+            d.updateAmount(checked == idx ? amount : 0);
+            this.self_busy = false;
         });
     }
 
@@ -319,7 +346,6 @@ class PopulationNeed extends Need {
         super(config);
 
         this.inhabitants = 0;
-
         this.percentBoost = ko.observable(100);
         this.percentBoost.subscribe(val => {
             val = parseInt(val);
@@ -384,19 +410,127 @@ class BuildingMaterialsNeed extends Need {
 class PopulationLevel extends NamedElement {
     constructor(config) {
         super(config);
+        this.workforce = assetsMap.get(config.workforce);
         this.amount = ko.observable(0);
+        this.projectedAmount = ko.observable(0);
+        this.jobRate = ko.pureComputed(() => {
+            return parseFloat((this.workforce.amount() / this.projectedAmount() * 100).toString()).toFixed(2);
+        });
+        this.jobRateVisible = ko.pureComputed(() => {
+            return Math.isFinite(this.jobRate);
+        });
+        this.houseCount = ko.pureComputed(() => {
+            return Math.ceil(this.projectedAmount() / this.fullHouse);
+        });
+        this.recalculateFlag = false;
         this.noOptionalNeeds = ko.observable(false);
+        this.previousAmount = null;
         this.needs = [];
+        this.workforceSubscription = null;
         config.needs.forEach(n => {
             if (n.tpmin > 0)
                 this.needs.push(new PopulationNeed(n));
         });
+
+        // :MARK: :A1: De is de feedback loop, koppel dit aan de workforce
         this.amount.subscribe(val => {
-            if (val < 0)
-                this.amount(0);
-            else
-                this.needs.forEach(n => n.updateAmount(parseInt(val)))
+            console.clear();
+            val = parseInt(val);
+            console.log('-------- INPUT', this.name(), val);
+            if (this.previousAmount > val || val > this.projectedAmount())
+                this.recalculateAllLevels(val);
+            this.previousAmount = val;
         });
+
+        this.workforceSubscribe();
+
+        // Once the projected amount is calculated is should be sent here.
+        this.projectedAmount.subscribe(val => {
+            console.info(this.name(), 'projected:', val);
+            this.workforceUnsubscribe();
+            let previous = this.workforce.amount();
+            this.needs.forEach(n => n.updateAmount(val));
+            this.workforceSubscribe();
+            let current = this.workforce.amount();
+            if (current != previous || current > val) {
+                this.pipelineAmount(current);
+            }
+        });
+    }
+
+    pipelineAmount(value, fromInput = false) {
+        if (fromInput == false) {
+            let base = parseInt(this.amount());
+            if (base > value)
+                value = base;
+        }
+        this.projectedAmount(this.ceilPopulation(value));
+    }
+
+    ceilPopulation(value) {
+        let remainder = value % this.fullHouse;
+        if (remainder != 0)
+            value += this.fullHouse - remainder;
+        return value;
+    }
+
+    recalculateAllLevels(value) {
+        // Unsubscribe from workforce updates if we foresee recalculations.
+        for (let l of view.sortedPopulationLevels) {
+            if (l != this && l.shouldRecalculate()) {
+                l.recalculateFlag = true;
+                l.workforceUnsubscribe();
+            }
+        }
+        for (let l of view.sortedPopulationLevels) {
+            if (l == this) {
+                this.pipelineAmount(value, true);
+            }
+            else if (l.recalculateFlag) {
+                l.recalculateFlag = false;
+                l.recalculate();
+                l.workforceSubscribe();
+            }
+        }
+    }
+
+    shouldRecalculate() {
+        let amount = parseInt(this.amount());
+        return amount == 0 && this.projectedAmount() != 0;
+    }
+
+    recalculate() {
+        let amount = parseInt(this.amount());
+        console.log(this.name(), 'is recalculating');
+        this.pipelineAmount(amount, true);
+    }
+
+    workforceSubscribe() {
+        if (this.workforceSubscription == null) {
+            console.log(this.name(), 'subscribed to workforce');
+            this.workforceSubscription = this.workforce.amount.subscribe(val => this.receiveWorkforce(val));
+        }
+    }
+
+    workforceUnsubscribe() {
+        if (this.workforceSubscription != null) {
+            console.log(this.name(), 'unsubscribed from workforce');
+            this.workforceSubscription.dispose();
+            this.workforceSubscription = null;
+        }
+    }
+
+    receiveWorkforce(val) {
+        console.log(this.name(), 'workforce updated to', val);
+        this.pipelineAmount(val);
+    }
+
+    getBusyNeed() {
+        for (let n of this.needs) {
+            let busy = n.busy();
+            if (busy) return busy;
+        }
+        return false;
     }
 
     incrementAmount() {
@@ -475,7 +609,6 @@ class PopulationReader {
 
         // only ping the server when the website is run locally
         if (isLocal()) {
-            console.log('waiting for responses from ' + this.url);
             this.requestInterval = setInterval(this.handleResponse.bind(this), 1000);
 
             $.getJSON("https://api.github.com/repos/Dejauxvue/AnnoCalculatorServer/releases/latest").done((release) => {
@@ -696,6 +829,7 @@ function init() {
         }
     }
 
+    // :MARK: Hier worden poplevels geinitieerd.
     for (let level of params.populationLevels) {
         let l = new PopulationLevel(level)
         assetsMap.set(l.guid, l);
@@ -762,6 +896,7 @@ function init() {
 
         }
     }
+    view.sortedPopulationLevels = view.populationLevels.slice().sort((a, b) => b.order - a.order);
 
     for (category of params.productFilter) {
         let c = new ProductCategory(category);
@@ -858,7 +993,7 @@ function init() {
 
 
     // listen for the server providing the population count
-    window.reader = new PopulationReader();
+    // window.reader = new PopulationReader();
 }
 
 function removeSpaces(string) {
@@ -868,7 +1003,7 @@ function removeSpaces(string) {
 }
 
 function isLocal() {
-    return window.location.protocol == 'file:' || /localhost|127\.0\.0\.1/.test( window.location.host.replace);
+    return window.location.protocol == 'file:' || /localhost|127\.0\.0\.1/.test(window.location.host.replace);
 }
 
 function exportConfig() {

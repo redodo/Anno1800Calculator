@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE HTML>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +28,7 @@
     <script type="text/javascript" src="params_2019-06-05_full.js"></script>
     <script type="text/javascript" src="toggle-dark-mode.js"></script>
 </head>
+
 <body>
     <!-- #params-dialog -->
     <div id="params-dialog" class="modal fade" role="dialog" tabindex="-1" aria-hidden="true">
@@ -142,18 +144,21 @@
                                     <span data-bind="text: name"></span>
                                 </div>
 
-                                <div class="ui-fchain-item-icon" data-bind="foreach: $data.factories"><img src="" data-bind="attr: { src: $data.icon ? icon : null, alt: name }"></div>
+                                <div class="ui-fchain-item-icon" data-bind="foreach: $data.factories"><img src=""
+                                        data-bind="attr: { src: $data.icon ? icon : null, alt: name }"></div>
 
 
                                 <div data-bind="foreach: $data.replacementArray">
                                     <div class="ui-fchain-item-icon-replacement">
                                         <span class="strike-through">
-                                            <img src="" data-bind="attr: { src: $data.old.icon ? $data.old.icon : null, alt: $data.old.name }" width="30" height="30">
+                                            <img src="" data-bind="attr: { src: $data.old.icon ? $data.old.icon : null, alt: $data.old.name }"
+                                                width="30" height="30">
                                         </span>
                                         <div class="ui-replacement-spacer">
                                             →
                                         </div>
-                                        <img src="" data-bind="attr: { src: $data.new.icon ? $data.new.icon : null, alt: $data.new.name }" width="30" height="30">
+                                        <img src="" data-bind="attr: { src: $data.new.icon ? $data.new.icon : null, alt: $data.new.name }"
+                                            width="30" height="30">
                                     </div>
                                 </div>
                             </div>
@@ -180,11 +185,13 @@
                             <td data-bind="text: texts.downloadConfig.name"></td>
                             <td>
                                 <div class="btn-group float-right">
-                                    <label class="btn btn-secondary" id="import-config-button" role="button" href="#" for="config-selector">
+                                    <label class="btn btn-secondary" id="import-config-button" role="button" href="#"
+                                        for="config-selector">
                                         <input id="config-selector" type="file" style="display: none;">
                                         <span class="fa fa-upload"> </span>
                                     </label>
-                                    <label data-bind="click: () => exportConfig()" id="export-config-button" role="button" href="#" class="btn btn-secondary">
+                                    <label data-bind="click: () => exportConfig()" id="export-config-button" role="button"
+                                        href="#" class="btn btn-secondary">
                                         <span class="fa fa-download"> </span>
                                     </label>
                                 </div>
@@ -193,7 +200,8 @@
                         <tr>
                             <td data-bind="text: texts.downloadCalculator.name" style="white-space:pre-wrap"></td>
                             <td>
-                                <a id="download-calculator-button" role="button" href="https://github.com/NiHoel/Anno1800Calculator/releases/latest" class="btn btn-secondary float-right">
+                                <a id="download-calculator-button" role="button" href="https://github.com/NiHoel/Anno1800Calculator/releases/latest"
+                                    class="btn btn-secondary float-right">
                                     <span class="fa fa-download"> </span>
                                 </a>
                             </td>
@@ -204,7 +212,8 @@
                                 <a href="https://github.com/Dejauxvue/AnnoCalculatorServer">https://github.com/Dejauxvue/AnnoCalculatorServer</a>
                             </td>
                             <td>
-                                <a id="download-calculator-server-button" role="button" href="https://github.com/Dejauxvue/AnnoCalculatorServer/releases/latest" class="btn btn-secondary float-right">
+                                <a id="download-calculator-server-button" role="button" href="https://github.com/Dejauxvue/AnnoCalculatorServer/releases/latest"
+                                    class="btn btn-secondary float-right">
                                     <span class="fa fa-download"> </span>
                                 </a>
                             </td>
@@ -251,7 +260,8 @@
 
                             <div class="input text">
                                 <div class="input-group spinner mb-3">
-                                    <input step="100" class="form-control input-lg" type="number" value="0" data-bind="value: amount, attr: {title: 'Press '+name()[0]+' to focus' }" />
+                                    <input step="10" class="form-control input-lg" type="number" min="0" value="0"
+                                        data-bind="value: amount, attr: {title: 'Press '+name()[0]+' to focus' }" />
                                 </div>
                             </div>
 
@@ -292,6 +302,42 @@
             </div>
         </fieldset>
 
+        <fieldset class="ui-fieldset" id="projected-pop-view">
+            <legend class="collapser" data-toggle="collapse" data-target="#projected-pop">
+                <span class="fa fa-chevron-right"></span>
+                <span class="fa fa-chevron-down"></span>
+                <span>Projected Population</span>
+            </legend>
+
+            <div id="projected-pop" class="collapse show">
+
+                <div class="ui-race-input fleft">
+                    <!-- <div class="ui-race-icon">
+                        <img src="/img/icons/gui_icon_map_0-17-10.png" alt="Old World" width="46" height="46">
+                    </div> -->
+                    <div data-bind="foreach: populationLevels">
+                        <div class="ui-race-unit">
+                            <div class="ui-race-unit-icon"><img data-bind="attr: { src: $data.icon ? icon : null, alt: name }"></div>
+                            <!--<div class="ui-race-unit-name" data-bind="text: name"></div>-->
+                            <div class="ui-fchain-item-count">
+                                <span data-bind="text: projectedAmount"></span>
+                            </div>
+                            <div class="ui-fchain-item-count" data-bind="css: { invisible: !jobRateVisible }">
+                                <span data-bind="text: jobRate"></span>%
+                            </div>
+                            <div class="ui-fchain-item-count">
+                                <span data-bind="text: houseCount"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="clear"></div>
+            </div>
+        </fieldset>
+
 
         <div data-bind="foreach: categories">
             <fieldset class="ui-fieldset" id="categories-view">
@@ -315,8 +361,10 @@
                                                 <input class="form-control" type="text" value="100" data-bind="value: percentBoost" />
                                                 <div class="input-group-append">
                                                     <div class="input-group-btn-vertical">
-                                                        <button class="btn btn-default" type="button" data-bind="click: incrementPercentBoost"><i class="fa fa-caret-up"></i></button>
-                                                        <button class="btn btn-default" type="button" data-bind="click: decrementPercentBoost, enable: parseInt(percentBoost()) > 1"><i class="fa fa-caret-down"></i></button>
+                                                        <button class="btn btn-default" type="button" data-bind="click: incrementPercentBoost"><i
+                                                                class="fa fa-caret-up"></i></button>
+                                                        <button class="btn btn-default" type="button" data-bind="click: decrementPercentBoost, enable: parseInt(percentBoost()) > 1"><i
+                                                                class="fa fa-caret-down"></i></button>
                                                     </div>
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -330,8 +378,10 @@
                                             <span data-bind="text: $root.settings.decimalsForBuildings.checked() ? Math.ceil(100*parseFloat(buildings()))/100 : Math.ceil(buildings())"></span>
                                             <span>x</span>
                                             <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-secondary" data-bind="click: () => incrementBuildings(), enable: buildings() > 0" style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">+</button>
-                                                <button type="button" class="btn btn-secondary" data-bind="click: () => decrementBuildings(), enable: buildings() >= 1.01" style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">-</button>
+                                                <button type="button" class="btn btn-secondary" data-bind="click: () => incrementBuildings(), enable: buildings() > 0"
+                                                    style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">+</button>
+                                                <button type="button" class="btn btn-secondary" data-bind="click: () => decrementBuildings(), enable: buildings() >= 1.01"
+                                                    style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">-</button>
                                             </div>
                                         </div>
                                     </div>
@@ -343,8 +393,10 @@
                                             <span data-bind="text: existingBuildings()"></span>
                                             <span>x</span>
                                             <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-secondary" data-bind="click: () => existingBuildings(parseInt(existingBuildings() + 1))" style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">+</button>
-                                                <button type="button" class="btn btn-secondary" data-bind="click: () => existingBuildings(parseInt(existingBuildings() - 1)), enable: existingBuildings() >= 1" style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">-</button>
+                                                <button type="button" class="btn btn-secondary" data-bind="click: () => existingBuildings(parseInt(existingBuildings() + 1))"
+                                                    style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">+</button>
+                                                <button type="button" class="btn btn-secondary" data-bind="click: () => existingBuildings(parseInt(existingBuildings() - 1)), enable: existingBuildings() >= 1"
+                                                    style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">-</button>
                                             </div>
                                         </div>
                                     </div>
@@ -357,8 +409,10 @@
                                                 <input class="form-control" type="text" value="0" step="1" data-bind="value: existingBuildings" />
                                                 <div class="input-group-append">
                                                     <div class="input-group-btn-vertical">
-                                                        <button class="btn btn-default" type="button" data-bind="click: () => existingBuildings(parseInt(existingBuildings()) + 1)"><i class="fa fa-caret-up"></i></button>
-                                                        <button class="btn btn-default" type="button" data-bind="click: () => existingBuildings(parseInt(existingBuildings()) - 1), enable: existingBuildings() > 0"><i class="fa fa-caret-down"></i></button>
+                                                        <button class="btn btn-default" type="button" data-bind="click: () => existingBuildings(parseInt(existingBuildings()) + 1)"><i
+                                                                class="fa fa-caret-up"></i></button>
+                                                        <button class="btn btn-default" type="button" data-bind="click: () => existingBuildings(parseInt(existingBuildings()) - 1), enable: existingBuildings() > 0"><i
+                                                                class="fa fa-caret-down"></i></button>
                                                     </div>
                                                     <span class="input-group-text">x</span>
                                                 </div>
@@ -374,20 +428,24 @@
                                             <span data-bind="text: $root.settings.decimalsForBuildings.checked() ? Math.ceil(100*parseFloat(buildings()))/100 : Math.ceil(buildings())"></span>
                                             <span>x</span>
                                             <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-secondary" data-bind="click: () => incrementBuildings(), enable: buildings() > 0" style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">+</button>
-                                                <button type="button" class="btn btn-secondary" data-bind="click: () => decrementBuildings(), enable: buildings() > 1.00001" style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">-</button>
+                                                <button type="button" class="btn btn-secondary" data-bind="click: () => incrementBuildings(), enable: buildings() > 0"
+                                                    style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">+</button>
+                                                <button type="button" class="btn btn-secondary" data-bind="click: () => decrementBuildings(), enable: buildings() > 1.00001"
+                                                    style="padding: 0em 0.25em 0em 0.25em; font-size: unset;">-</button>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.tonsPerMinute.name}">
-                                        <div class="ui-fchain-item-load"><span data-bind="text: Math.ceil(100*parseFloat(amount()))/100"></span><span> t/min</span></div>
+                                        <div class="ui-fchain-item-load"><span data-bind="text: Math.ceil(100*parseFloat(amount()))/100"></span><span>
+                                                t/min</span></div>
 
                                     </div>
                                     <div class="ui-fchain-item-load" data-bind="if: !$data.editable, visible: $root.settings.additionalProduction.checked()">
 
                                         <div class="input-group spinner mb-3">
-                                            <div class="input-group-prepend"><span class="input-group-text">+ </span> </div>
+                                            <div class="input-group-prepend"><span class="input-group-text">+ </span>
+                                            </div>
                                             <input step="0.1" class="form-control" type="number" value="0" data-bind="value: extraAmount" />
                                         </div>
 
@@ -426,8 +484,10 @@
                                     <input class="form-control" type="text" value="100" min="1" data-bind="value: percentBoost" />
                                     <div class="input-group-append">
                                         <div class="input-group-btn-vertical">
-                                            <button class="btn btn-default" type="button" data-bind="click: incrementPercentBoost"><i class="fa fa-caret-up"></i></button>
-                                            <button class="btn btn-default" type="button" data-bind="click: decrementPercentBoost, enable: parseInt(percentBoost()) > 1"><i class="fa fa-caret-down"></i></button>
+                                            <button class="btn btn-default" type="button" data-bind="click: incrementPercentBoost"><i
+                                                    class="fa fa-caret-up"></i></button>
+                                            <button class="btn btn-default" type="button" data-bind="click: decrementPercentBoost, enable: parseInt(percentBoost()) > 1"><i
+                                                    class="fa fa-caret-down"></i></button>
                                         </div>
                                         <span class="input-group-text">%</span>
                                     </div>
@@ -441,7 +501,8 @@
                                 </div>
                                 <div class="ui-fchain-item-load">
                                     <span href="#" data-toggle="tooltip" data-bind="attr: {'title' : $root.texts.tonsPerMinute.name}">
-                                        <span data-bind="text: Math.ceil(100*parseFloat(amount()))/100"></span><span> t/min</span>
+                                        <span data-bind="text: Math.ceil(100*parseFloat(amount()))/100"></span><span>
+                                            t/min</span>
                                     </span>
                                 </div>
                                 <!--<div class="ui-fchain-item-loadbar"><div style="background-color:red; width:4px;"><img src="/img/pixel.gif" width="1" height="6"></div></div>-->
@@ -490,4 +551,5 @@
 
     </div>
 </body>
+
 </html>
